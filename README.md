@@ -6,6 +6,7 @@ Analyze 340,000 building-material transaction records to understand revenue, uni
 - `building_materials_transactions.csv`: transaction-level sales data.
 - `data_dictionary_materials.csv`: field definitions.
 - `macro_drivers_weekly.csv`: weekly housing, lumber-price, and mortgage-rate indicators.
+-  Dataset source link path = kagglehub.dataset_download("sergionefedov/us-building-materials-sales-transactions-20192024")
 
 ## Questions Answered
 1. What is the monthly and yearly revenue trend?
