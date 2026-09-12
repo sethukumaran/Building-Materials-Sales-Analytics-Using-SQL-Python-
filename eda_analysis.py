@@ -1,0 +1,17 @@
+import pandas as pd, numpy as np, matplotlib.pyplot as plt
+from pathlib import Path
+tx=pd.read_csv('building_materials_transactions.csv',parse_dates=['date'])
+out=Path('outputs'); out.mkdir(exist_ok=True)
+print(tx.info(), tx.describe(include='all'))
+print('missing',tx.isna().sum(),'duplicates',tx.duplicated().sum())
+tx['revenue_per_unit']=tx['revenue']/tx['units'].replace(0,np.nan)
+tx['month_name']=tx['date'].dt.strftime('%b')
+print(tx.groupby('region').agg(revenue=('revenue','sum'),units=('units','sum'),avg_price=('unit_price','mean')).sort_values('revenue',ascending=False))
+print(tx.groupby('product_category').agg(revenue=('revenue','sum'),units=('units','sum')).sort_values('revenue',ascending=False))
+print(tx[['revenue','units','unit_price','housing_starts_index','lumber_price_index','mortgage_rate']].corr().round(3))
+tx.to_csv(out/'clean_transactions.csv',index=False)
+for name,g in [('monthly_revenue',tx.groupby(['year','month'],as_index=False).revenue.sum()),('region_summary',tx.groupby('region',as_index=False).revenue.sum()),('category_summary',tx.groupby('product_category',as_index=False).revenue.sum())]: g.to_csv(out/name+'.csv',index=False)
+plt.figure(); tx.groupby(['year','month']).revenue.sum().plot(); plt.title('Monthly Revenue'); plt.tight_layout(); plt.savefig(out/'monthly_revenue.png'); plt.close()
+plt.figure(); tx.groupby('region').revenue.sum().sort_values().plot(kind='barh'); plt.title('Revenue by Region'); plt.tight_layout(); plt.savefig(out/'revenue_by_region.png'); plt.close()
+plt.figure(); tx.groupby('product_category').revenue.sum().sort_values().plot(kind='barh'); plt.title('Revenue by Category'); plt.tight_layout(); plt.savefig(out/'revenue_by_category.png'); plt.close()
+plt.figure(); plt.scatter(tx['lumber_price_index'],tx['revenue'],s=2,alpha=.2); plt.xlabel('Lumber Price Index'); plt.ylabel('Revenue'); plt.title('Lumber Index vs Revenue'); plt.tight_layout(); plt.savefig(out/'lumber_vs_revenue.png'); plt.close()
